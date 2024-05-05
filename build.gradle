@@ -1,188 +1,82 @@
-buildscript {
-  repositories {
-    maven { url = 'https://maven.minecraftforge.net' }
-    maven { url = 'https://plugins.gradle.org/m2/' }
-    mavenCentral()
-  }
-
-  dependencies {
-    classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-    classpath group: 'gradle.plugin.com.modrinth.minotaur', name: 'Minotaur', version: '1.2.1'
-    classpath group: 'gradle.plugin.com.matthewprenger',  name: 'CurseGradle', version: '1.4.0'
-    classpath group: 'org.spongepowered',  name: 'mixingradle', version: '0.7+'
-  }
+plugins {
+    id 'fabric-loom' version '1.6-SNAPSHOT' apply(false)
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)' apply(false)
+    id 'org.spongepowered.gradle.vanilla' version '0.2.1-SNAPSHOT' apply(false)
+    id("org.spongepowered.mixin") version "0.7-SNAPSHOT" apply(false)
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-apply plugin: 'org.spongepowered.mixin'
-apply plugin: 'com.matthewprenger.cursegradle'
 
-ext.config = parseConfig(file('build.properties'))
+subprojects {
+    apply plugin: 'java'
 
-version = config.VERSION
-group = "${config.GROUP}.${config.ARTIFACT}"
-archivesBaseName = "${config.ARCHIVES_BASE_NAME}-${config.MINECRAFT_VERSION}"
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
-minecraft {
-  mappings channel: config.MAPPINGS_CHANNEL, version: config.MAPPINGS_VERSION
-
-  runs {
-    client {
-      workingDirectory project.file('run')
-//    property 'forge.logging.markers', 'REGISTRIES'
-      property 'forge.logging.console.level', 'debug'
-      mods {
-        celesteconfig {
-          source sourceSets.main
+    java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+    java.withSourcesJar()
+    java.withJavadocJar()
+        
+    jar {
+        from(rootProject.file("LICENSE")) {
+            rename { "${it}_${mod_name}" }
         }
-      }
+        manifest {
+            attributes([
+                'Specification-Title'     : mod_name,
+                'Specification-Vendor'    : mod_author,
+                'Specification-Version'   : project.jar.archiveVersion,
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Vendor'   : mod_author,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                'Timestamp'               : System.currentTimeMillis(),
+                'Built-On-Java'           : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+                'Built-On-Minecraft'      : minecraft_version
+            ])
+        }
     }
 
-    server {
-      workingDirectory project.file('run')
-//    property 'forge.logging.markers', 'REGISTRIES'
-      property 'forge.logging.console.level', 'debug'
-      mods {
-        celesteconfig {
-          source sourceSets.main
+    sourcesJar {
+        from(rootProject.file("LICENSE")) {
+            rename { "${it}_${mod_name}" }
         }
-      }
     }
 
-    data {
-      workingDirectory project.file('run')
-//    property 'forge.logging.markers', 'REGISTRIES'
-      property 'forge.logging.console.level', 'debug'
-      args '--mod', config.MOD_ID, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-      mods {
-        celesteconfig {
-          source sourceSets.main
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'Sponge / Mixin'
+            url = 'https://repo.spongepowered.org/repository/maven-public/'
         }
-      }
-    }
-  }
-}
-
-repositories {
-
-}
-
-dependencies {
-  minecraft "net.minecraftforge:forge:${config.MINECRAFT_VERSION}-${config.FORGE_VERSION}"
-  annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-}
-
-jar {
-  manifest {
-    attributes([
-      'Specification-Title'   : config.TITLE,
-      'Specification-Vendor'  : config.AUTHOR,
-      'Specification-Version' : '1',
-      'Implementation-Title'  : config.TITLE,
-      'Implementation-Version': config.VERSION,
-      'Implementation-Vendor' : config.AUTHOR
-    ])
-  }
-}
-
-mixin {
-  add sourceSets.main, 'celesteconfig.refmap.json'
-  config 'celesteconfig.mixins.json'
-}
-
-jar.finalizedBy('reobfJar')
-
-publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      groupId = config.GROUP
-      artifactId = config.ARTIFACT
-      artifact jar
-
-      pom {
-        name = config.NAME
-        url = config.URL
-        licenses {
-          license {
-            name = config.LICENSE_NAME
-            url = config.LICENSE_URL
-          }
+        maven {
+            name = 'BlameJared Maven (JEI / CraftTweaker / Bookshelf)'
+            url = 'https://maven.blamejared.com'
         }
-        scm {
-          connection = config.SCM_CONNECTION
-          url = config.SCM_URL
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+    
+        it.options.encoding = 'UTF-8'
+        it.options.getRelease().set(17)
+    }
+
+    processResources {
+        def expandProps = [
+                "version": version,
+                "group": project.group, //Else we target the task's group.
+                "minecraft_version": minecraft_version,
+                "forge_version": forge_version,
+                "forge_loader_version_range": forge_loader_version_range,
+                "forge_version_range": forge_version_range,
+                "minecraft_version_range": minecraft_version_range,
+                "fabric_version": fabric_version,
+                "fabric_loader_version": fabric_loader_version,
+                "mod_name": mod_name,
+                "mod_author": mod_author,
+                "mod_id": mod_id,
+                "license": license,
+                "description": project.description
+        ]
+
+        filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', '*.mixins.json']) {
+            expand expandProps
         }
-      }
+        inputs.properties(expandProps)
     }
-  }
-
-  repositories {
-    maven {
-      url config.MAVEN_URL
-
-      
-      credentials {
-        username = System.getenv('MAVEN_USER')
-        password = System.getenv('MAVEN_TOKEN')
-      }
-      
-      authentication {
-        basic(BasicAuthentication)
-      }
-    }
-  }
-}
-
-task publishModrinth() {
-  println('Modrinth publishing is not setup yet!')
-}
-
-tasks.curseforge.configure {
-  actions.clear()
-  doLast {
-    println('Modrinth publishing is not setup yet!')
-  }
-}
-
-// // Modrinth publishing
-// import com.modrinth.minotaur.TaskModrinthUpload
-
-// task publishModrinth (type: TaskModrinthUpload) {
-//   onlyIf {
-//     System.getenv('MODRINTH')
-//   }
-
-//   token = System.getenv('MODRINTH')
-//   projectId = config.MODRINTH_ID
-//   versionNumber = project.version
-//   uploadFile = jar
-//   addGameVersion(config.MINECRAFT_VERSION)
-//   addLoader('forge')
-// }
-
-// // Curseforge publishing
-// curseforge {
-//   apiKey = System.getenv('CURSEFORGE') ?: 'If you\'re seeing this, you haven\'t set your "CURSEFORGE" environment variable'
-  
-//   project {
-//     id = config.CURSEFORGE_ID
-//     changelog = 'No changelog specified.'
-//     releaseType = 'release'
-//     addGameVersion config.MINECRAFT_VERSION
-//     mainArtifact (jar) { 
-//       displayName = "${project.version}"
-//     }
-//   }
-// }
-
-// Config parse function
-def parseConfig(File config) {
-  config.withReader {
-    def prop = new Properties()
-    prop.load(it)
-    return new ConfigSlurper().parse(prop)
-  }
 }
