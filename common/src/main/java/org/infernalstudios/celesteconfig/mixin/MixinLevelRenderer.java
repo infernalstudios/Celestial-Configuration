@@ -16,17 +16,21 @@ public class MixinLevelRenderer {
 
     @ModifyVariable(method = "renderSky(Lcom/mojang/blaze3d/vertex/PoseStack;Lorg/joml/Matrix4f;FLnet/minecraft/client/Camera;ZLjava/lang/Runnable;)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/resources/ResourceLocation;)V", ordinal = 0), ordinal = 1)
     private Matrix4f celesteConfig$scaleSun(Matrix4f in) {
-        originalCelestialMatrix = new Matrix4f(in); // Assuming originalCelestialMatrix is declared elsewhere
+        originalCelestialMatrix = new Matrix4f(in);
         Matrix4f copy = new Matrix4f(in);
-        copy.mul(in.scaling((float) Constants.sunWidth, 1.0F, (float) Constants.sunHeight));
+        copy.scale((float) Constants.sunWidth, 1.0F, (float) Constants.sunHeight);
         return copy;
     }
 
     @ModifyVariable(method = "renderSky(Lcom/mojang/blaze3d/vertex/PoseStack;Lorg/joml/Matrix4f;FLnet/minecraft/client/Camera;ZLjava/lang/Runnable;)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/resources/ResourceLocation;)V", ordinal = 1), ordinal = 1)
     private Matrix4f celesteConfig$scaleMoon(Matrix4f in) {
-        Matrix4f copy = new Matrix4f(originalCelestialMatrix);
-        copy.mul(in.scaling((float) Constants.moonWidth, 1.0F, (float) Constants.moonHeight));
-        originalCelestialMatrix = null;
-        return copy;
+        if (originalCelestialMatrix != null) {
+            Matrix4f copy = new Matrix4f(originalCelestialMatrix);
+            copy.scale((float) Constants.moonWidth, 1.0F, (float) Constants.moonHeight);
+            originalCelestialMatrix = null;
+            return copy;
+        } else {
+            return in;
+        }
     }
 }
