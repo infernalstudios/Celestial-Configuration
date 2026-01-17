@@ -23,7 +23,7 @@ public class CelestialConfigOptions {
         moonWidthScalar = client_builder.comment("Moon Width Scalar").defineInRange("celesteconfig.moon.width", 1.0D, 0.0D, 100.0D);
         moonHeightScalar = client_builder.comment("Moon Height Scalar").defineInRange("celesteconfig.moon.height", 1.0D, 0.0D, 100.0D);
         sunWidthScalar = client_builder.comment("Sun Width Scalar").defineInRange("celesteconfig.sun.width", 1.0D, 0.0D, 100.0D);
-        sunHeightScalar = client_builder.comment("Moon Height Scalar").defineInRange("celesteconfig.sun.height", 1.0D, 0.0D, 100.0D);
+        sunHeightScalar = client_builder.comment("Sun Height Scalar").defineInRange("celesteconfig.sun.height", 1.0D, 0.0D, 100.0D);
         client_config = client_builder.build();
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, CelestialConfigOptions.client_config);
@@ -37,16 +37,36 @@ public class CelestialConfigOptions {
         return moonWidthScalar.get();
     }
 
+    public static void setMoonWidthScalar(double value) {
+        moonWidthScalar.set(value);
+        client_config.save();
+    }
+
     public static double getMoonHeightScalar() {
         return moonHeightScalar.get();
+    }
+
+    public static void setMoonHeightScalar(double value) {
+        moonHeightScalar.set(value);
+        client_config.save();
     }
 
     public static double getSunWidthScalar() {
         return sunWidthScalar.get();
     }
 
+    public static void setSunWidthScalar(double value) {
+        sunWidthScalar.set(value);
+        client_config.save();
+    }
+
     public static double getSunHeightScalar() {
         return sunHeightScalar.get();
+    }
+
+    public static void setSunHeightScalar(double value) {
+        sunHeightScalar.set(value);
+        client_config.save();
     }
 
 }
