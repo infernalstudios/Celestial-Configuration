@@ -1,0 +1,1 @@
+* Fixed cloth config integration.

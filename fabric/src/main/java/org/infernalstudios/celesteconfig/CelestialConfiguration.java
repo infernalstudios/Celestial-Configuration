@@ -3,7 +3,6 @@ package org.infernalstudios.celesteconfig;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.ModInitializer;
 import org.infernalstudios.celesteconfig.config.CelestialConfigClothConfig;
 
 public class CelestialConfiguration implements ClientModInitializer {
