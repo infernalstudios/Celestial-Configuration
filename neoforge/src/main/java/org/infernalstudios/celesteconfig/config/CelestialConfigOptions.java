@@ -1,52 +1,79 @@
 package org.infernalstudios.celesteconfig.config;
 
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import com.electronwill.nightconfig.core.io.WritingMode;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
-
-import java.io.File;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class CelestialConfigOptions {
 
-    private static final ModConfigSpec.Builder client_builder = new ModConfigSpec.Builder();
-    private static ModConfigSpec.DoubleValue moonWidthScalar;
-    private static ModConfigSpec.DoubleValue moonHeightScalar;
-    private static ModConfigSpec.DoubleValue sunWidthScalar;
-    private static ModConfigSpec.DoubleValue sunHeightScalar;
-    private static ModConfigSpec CLIENT_CONFIG;
+    public static final ModConfigSpec CLIENT_SPEC;
+    public static final ClientConfig CLIENT;
 
-    public static void init(ModContainer modContainer) {
-        client_builder.comment("Celestial Configuration");
-        moonWidthScalar = client_builder.comment("Moon Width Scalar").defineInRange("celesteconfig.moon.width", 1.0D, 0.0D, 100.0D);
-        moonHeightScalar = client_builder.comment("Moon Height Scalar").defineInRange("celesteconfig.moon.height", 1.0D, 0.0D, 100.0D);
-        sunWidthScalar = client_builder.comment("Sun Width Scalar").defineInRange("celesteconfig.sun.width", 1.0D, 0.0D, 100.0D);
-        sunHeightScalar = client_builder.comment("Moon Height Scalar").defineInRange("celesteconfig.sun.height", 1.0D, 0.0D, 100.0D);
-        CLIENT_CONFIG = client_builder.build();
-
-        modContainer.registerConfig(ModConfig.Type.CLIENT, CLIENT_CONFIG);
-
-        CommentedFileConfig file = CommentedFileConfig.builder(new File(FMLPaths.CONFIGDIR.get().resolve("celesteconfig-client.toml").toString())).sync().autosave().writingMode(WritingMode.REPLACE).build();
-        file.load();
-        CLIENT_CONFIG.setConfig(file);
+    static {
+        final Pair<ClientConfig, ModConfigSpec> specPair = new ModConfigSpec.Builder().configure(ClientConfig::new);
+        CLIENT_SPEC = specPair.getRight();
+        CLIENT = specPair.getLeft();
     }
 
+    public static class ClientConfig {
+        public final ModConfigSpec.DoubleValue moonWidthScalar;
+        public final ModConfigSpec.DoubleValue moonHeightScalar;
+        public final ModConfigSpec.DoubleValue sunWidthScalar;
+        public final ModConfigSpec.DoubleValue sunHeightScalar;
+
+        public ClientConfig(ModConfigSpec.Builder builder) {
+            builder.comment("Celestial Configuration").push("celesteconfig");
+
+            moonWidthScalar = builder.comment("Moon Width Scalar")
+                    .defineInRange("moon.width", 1.0D, 0.0D, 100.0D);
+
+            moonHeightScalar = builder.comment("Moon Height Scalar")
+                    .defineInRange("moon.height", 1.0D, 0.0D, 100.0D);
+
+            sunWidthScalar = builder.comment("Sun Width Scalar")
+                    .defineInRange("sun.width", 1.0D, 0.0D, 100.0D);
+
+            sunHeightScalar = builder.comment("Sun Height Scalar")
+                    .defineInRange("sun.height", 1.0D, 0.0D, 100.0D);
+
+            builder.pop();
+        }
+    }
+
+    // --- Getters & Setters ---
+
     public static double getMoonWidthScalar() {
-        return moonWidthScalar.get();
+        return CLIENT.moonWidthScalar.get();
+    }
+
+    public static void setMoonWidthScalar(double value) {
+        CLIENT.moonWidthScalar.set(value);
+        CLIENT.moonWidthScalar.save();
     }
 
     public static double getMoonHeightScalar() {
-        return moonHeightScalar.get();
+        return CLIENT.moonHeightScalar.get();
+    }
+
+    public static void setMoonHeightScalar(double value) {
+        CLIENT.moonHeightScalar.set(value);
+        CLIENT.moonHeightScalar.save();
     }
 
     public static double getSunWidthScalar() {
-        return sunWidthScalar.get();
+        return CLIENT.sunWidthScalar.get();
+    }
+
+    public static void setSunWidthScalar(double value) {
+        CLIENT.sunWidthScalar.set(value);
+        CLIENT.sunWidthScalar.save();
     }
 
     public static double getSunHeightScalar() {
-        return sunHeightScalar.get();
+        return CLIENT.sunHeightScalar.get();
     }
 
+    public static void setSunHeightScalar(double value) {
+        CLIENT.sunHeightScalar.set(value);
+        CLIENT.sunHeightScalar.save();
+    }
 }
