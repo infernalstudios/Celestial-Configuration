@@ -14,33 +14,6 @@ public class CelestialConfigOptions {
         CLIENT = specPair.getLeft();
     }
 
-    public static class ClientConfig {
-        public final ModConfigSpec.DoubleValue moonWidthScalar;
-        public final ModConfigSpec.DoubleValue moonHeightScalar;
-        public final ModConfigSpec.DoubleValue sunWidthScalar;
-        public final ModConfigSpec.DoubleValue sunHeightScalar;
-
-        public ClientConfig(ModConfigSpec.Builder builder) {
-            builder.comment("Celestial Configuration").push("celesteconfig");
-
-            moonWidthScalar = builder.comment("Moon Width Scalar")
-                    .defineInRange("moon.width", 1.0D, 0.0D, 100.0D);
-
-            moonHeightScalar = builder.comment("Moon Height Scalar")
-                    .defineInRange("moon.height", 1.0D, 0.0D, 100.0D);
-
-            sunWidthScalar = builder.comment("Sun Width Scalar")
-                    .defineInRange("sun.width", 1.0D, 0.0D, 100.0D);
-
-            sunHeightScalar = builder.comment("Sun Height Scalar")
-                    .defineInRange("sun.height", 1.0D, 0.0D, 100.0D);
-
-            builder.pop();
-        }
-    }
-
-    // --- Getters & Setters ---
-
     public static double getMoonWidthScalar() {
         return CLIENT.moonWidthScalar.get();
     }
@@ -75,5 +48,30 @@ public class CelestialConfigOptions {
     public static void setSunHeightScalar(double value) {
         CLIENT.sunHeightScalar.set(value);
         CLIENT.sunHeightScalar.save();
+    }
+
+    public static class ClientConfig {
+        public final ModConfigSpec.DoubleValue moonWidthScalar;
+        public final ModConfigSpec.DoubleValue moonHeightScalar;
+        public final ModConfigSpec.DoubleValue sunWidthScalar;
+        public final ModConfigSpec.DoubleValue sunHeightScalar;
+
+        public ClientConfig(ModConfigSpec.Builder builder) {
+            builder.comment("Celestial Configuration").push("celesteconfig");
+
+            moonWidthScalar = builder.comment("Moon Width Scalar")
+                    .defineInRange("moon.width", 1.0D, 0.0D, 100.0D);
+
+            moonHeightScalar = builder.comment("Moon Height Scalar")
+                    .defineInRange("moon.height", 1.0D, 0.0D, 100.0D);
+
+            sunWidthScalar = builder.comment("Sun Width Scalar")
+                    .defineInRange("sun.width", 1.0D, 0.0D, 100.0D);
+
+            sunHeightScalar = builder.comment("Sun Height Scalar")
+                    .defineInRange("sun.height", 1.0D, 0.0D, 100.0D);
+
+            builder.pop();
+        }
     }
 }

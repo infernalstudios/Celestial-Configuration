@@ -5,21 +5,29 @@ import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import org.infernalstudios.celesteconfig.config.CelestialConfigOptions;
 
 @Mod(Constants.MOD_ID)
 public class CelestialConfiguration {
 
-    public CelestialConfiguration(ModContainer container) {
+    public CelestialConfiguration(IEventBus modEventBus, ModContainer container) {
         container.registerConfig(ModConfig.Type.CLIENT, CelestialConfigOptions.CLIENT_SPEC);
 
-        updateCommonClass();
+        modEventBus.addListener(this::onConfigEvent);
 
         container.registerExtensionPoint(IConfigScreenFactory.class, (modContainer, parent) -> buildConfigScreen(parent));
+    }
+
+    private void onConfigEvent(ModConfigEvent event) {
+        if (event.getConfig().getModId().equals(Constants.MOD_ID)) {
+            updateCommonClass();
+        }
     }
 
     private void updateCommonClass() {
